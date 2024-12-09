@@ -51,7 +51,7 @@ const scrapeInstagramPost = async (postLink) => {
     await page.goto(postLink, { waitUntil: 'domcontentloaded' });
     // await page.waitForTimeout(3000);
 
-    await waitForSelectorWithRetry(page, 'ul._a9ym', 5, 3000);
+    await waitForSelectorWithRetry(page, 'main', 5, 3000);
     
     await page.evaluate(async () => {
       for (let i = 0; i < 5; i++) {
