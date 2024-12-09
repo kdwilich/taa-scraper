@@ -63,7 +63,7 @@ const scrapeInstagramPost = async (postLink) => {
     
     let data = {};
     data = await page.evaluate(() => {
-      const idRegex = /#taa\d+/;
+      const idRegex = /#taa(\d+)/;
       let caption = null;
       let id = null;
 
@@ -74,7 +74,7 @@ const scrapeInstagramPost = async (postLink) => {
             caption = text;
           }
           if (!id && idRegex.test(text)) {
-            id = idRegex.exec(text)[0];
+            id = parseInt(text.match(idRegex)[1], 10);
           }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
           for (const child of node.childNodes) {
