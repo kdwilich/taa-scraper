@@ -1,7 +1,8 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const randomUseragent = require('random-useragent');
 
 const isVercel = process.env.VERCEL === '1'; // This checks if the app is running on Vercel
+const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'; // or another path to Chromium on Vercel
 
 // Function to introduce random delays
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
@@ -21,6 +22,7 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay = 
 const scrapeInstagramPost = async (postLink) => {
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: executablePath, // Specify the path to the Chromium binary
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -40,14 +42,14 @@ const scrapeInstagramPost = async (postLink) => {
   await page.setViewport({ width: 1280, height: 800 });
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
-  console.log('Navigating to the post...');
-  await page.goto(postLink, { waitUntil: 'domcontentloaded' });
-  await waitForSelectorWithRetry(page, 'ul._a9ym', 5, 5000);
-  await page.evaluate(() => window.scrollBy(0, Math.random() * 500));
-  await randomDelay(2000, 5000);
-  
-  let data = {};
   try {
+    console.log('Navigating to the post...');
+    await page.goto(postLink, { waitUntil: 'domcontentloaded' });
+    await waitForSelectorWithRetry(page, 'ul._a9ym', 5, 5000);
+    await page.evaluate(() => window.scrollBy(0, Math.random() * 500));
+    await randomDelay(2000, 5000);
+    
+    let data = {};
     data = await page.evaluate(() => {
       const caption = document.querySelector('div._a9zr ._a9zs')?.innerText || '';
       let id;
@@ -62,12 +64,17 @@ const scrapeInstagramPost = async (postLink) => {
       
       return { caption, id };
     });
+
+    console.log('Scraping completed.');
+    return data;
+
   } catch (error) {
-    console.error('Error during evaluation:', error.message);
+    console.error('Error scraping Instagram post:', error.message);
+    throw error;
+  } finally {
+    console.log('Closing browser...');
+    await browser.close();
   }
-  console.log('Scraping completed. Closing browser...');
-  await browser.close();
-  return data;
 };
 
 module.exports = scrapeInstagramPost;
