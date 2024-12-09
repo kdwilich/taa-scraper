@@ -44,8 +44,16 @@ const scrapeInstagramPost = async (postLink) => {
   try {
     console.log('Navigating to the post...');
     await page.goto(postLink, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(3000);
+
     await waitForSelectorWithRetry(page, 'ul._a9ym', 5, 5000);
-    await page.evaluate(() => window.scrollBy(0, Math.random() * 500));
+    
+    await page.evaluate(async () => {
+      for (let i = 0; i < 5; i++) {
+        window.scrollBy(0, 500);
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    });
     await randomDelay(2000, 5000);
     
     let data = {};
