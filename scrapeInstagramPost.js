@@ -6,7 +6,7 @@ const isVercel = process.env.VERCEL === '1';
 
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
-const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay = 3000) => {
+const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) => {
   for (let i = 0; i < maxRetries; i++) {
     try {
       await page.waitForSelector(selector, { timeout: delay });
@@ -36,9 +36,9 @@ const scrapeInstagramPost = async (postLink) => {
   try {
     console.log('Navigating to the post...');
     await page.goto(postLink, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(3000);
 
-    await waitForSelectorWithRetry(page, 'ul._a9ym', 5, 5000);
+    await waitForSelectorWithRetry(page, 'ul._a9ym', 5, 3000);
     
     await page.evaluate(async () => {
       for (let i = 0; i < 5; i++) {
@@ -46,7 +46,7 @@ const scrapeInstagramPost = async (postLink) => {
         await new Promise(r => setTimeout(r, 1000));
       }
     });
-    await randomDelay(2000, 5000);
+    // await randomDelay(2000, 5000);
     
     let data = {};
     data = await page.evaluate(() => {
