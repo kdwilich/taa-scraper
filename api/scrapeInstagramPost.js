@@ -1,5 +1,5 @@
 // local puppeteer:
-// const puppeteer = require('puppeteer-core');
+// const puppeteer = require('puppeteer');
 // vercal puppeteer:
 const puppeteer = require('puppeteer-core');
 const chromium = require("@sparticuz/chromium");
