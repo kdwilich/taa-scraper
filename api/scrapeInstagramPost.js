@@ -2,8 +2,6 @@ const puppeteer = require('puppeteer-core');
 const randomUseragent = require('random-useragent');
 const chromium = require("@sparticuz/chromium");
 
-const isVercel = process.env.VERCEL === '1';
-
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
 const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) => {

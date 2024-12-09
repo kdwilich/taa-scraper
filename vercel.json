@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "builds": [{
-    "src": "api.js",
-    "use": "@vercel/node"
-  }],
   "routes": [{
     "src": "/api/getPostDetails",
-    "dest": "/api.js"
-  }]
+    "dest": "/api/getPostDetails.js"
+  }],
+  "functions": {
+    "api/getPostDetails.js": {
+      "maxDuration": 60
+    }
+  }
 }
