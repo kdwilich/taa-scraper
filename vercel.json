@@ -5,7 +5,7 @@
     "dest": "/api/index.js"
   }],
   "functions": {
-    "api/index.js": {
+    "api/*.js": {
       "memory": 3009,
       "maxDuration": 60
     }
