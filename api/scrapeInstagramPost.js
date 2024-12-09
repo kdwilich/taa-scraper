@@ -1,8 +1,27 @@
-const puppeteer = require('puppeteer-core');
+const isVercel = process.env.VERCEL === '1';
+
+const puppeteer = isVercel ? require('puppeteer-core') : require('puppeteer');
 const randomUseragent = require('random-useragent');
 const chromium = require("@sparticuz/chromium");
 
-const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
+const browserOptions = async () => {
+  return isVercel ? 
+    {
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    }
+  :
+    {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ]
+    }
+}
 
 const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) => {
   for (let i = 0; i < maxRetries; i++) {
@@ -16,14 +35,10 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) =
   throw new Error(`Failed to load selector: ${selector} after ${maxRetries} retries`);
 };
 
+const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
+
 const scrapeInstagramPost = async (postLink) => {
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
-    ignoreHTTPSErrors: true,
-  });
+  const browser = await puppeteer.launch(await browserOptions);
   const page = await browser.newPage();
 
   const userAgent = randomUseragent.getRandom();
@@ -48,16 +63,28 @@ const scrapeInstagramPost = async (postLink) => {
     
     let data = {};
     data = await page.evaluate(() => {
-      const caption = document.querySelector('div._a9zr ._a9zs')?.innerText || '';
-      let id;
-      Array.from(document.querySelectorAll('ul._a9ym li')).forEach(el => {
-        const username = el.querySelector('h3')?.innerText || '';
-        const text = el.querySelector('div._a9zs')?.innerText || '';
-        if (username === 'theanglersattic' && text.includes('#taa')) {
-          const match = text.match(/#taa(\d+)/);
-          id = match ? parseInt(match[1], 10) : null;
+      const idRegex = /#taa\d+/;
+      let caption = null;
+      let id = null;
+
+      function traverseTextNodes(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent.trim();
+          if (!caption && text.startsWith('Vintage')) {
+            caption = text;
+          }
+          if (!id && idRegex.test(text)) {
+            id = idRegex.exec(text)[0];
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          for (const child of node.childNodes) {
+            traverseTextNodes(child);
+            if (caption && id) return; // Stop early if both are found
+          }
         }
-      });
+      }
+
+      traverseTextNodes(document.body);
       
       return { caption, id };
     });
