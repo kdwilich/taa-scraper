@@ -1,8 +1,8 @@
 {
   "version": 2,
   "builds": [{
-    "src": "api.js",
-    "use": "@vercel/node"
+    "src": "Dockerfile",
+    "use": "@vercel/docker"
   }],
   "routes": [{
     "src": "/api/getPostDetails",
