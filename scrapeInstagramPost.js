@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer-core');
 const randomUseragent = require('random-useragent');
-const chrome = require('chrome-aws-lambda');
+const chromium = require("@sparticuz/chromium");
 
 const isVercel = process.env.VERCEL === '1';
 
@@ -18,33 +18,14 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay = 
   throw new Error(`Failed to load selector: ${selector} after ${maxRetries} retries`);
 };
 
-const launchBrowserWithRetry = async (maxRetries = 3) => {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const browser = await puppeteer.launch({
-        headless: true,
-        executablePath: await chrome.executablePath,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          ...(isVercel ? [
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--no-zygote',
-            '--single-process'
-          ] : [])
-        ]
-      });
-      return browser;
-    } catch (error) {
-      console.error(`Error launching browser (attempt ${i + 1}/${maxRetries}):`, error);
-      if (i === maxRetries - 1) throw error;
-    }
-  }
-};
-
 const scrapeInstagramPost = async (postLink) => {
-  const browser = await launchBrowserWithRetry();
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+    ignoreHTTPSErrors: true,
+  });
   const page = await browser.newPage();
 
   const userAgent = randomUseragent.getRandom();
@@ -65,6 +46,7 @@ const scrapeInstagramPost = async (postLink) => {
         await new Promise(r => setTimeout(r, 1000));
       }
     });
+    await randomDelay(2000, 5000);
     
     let data = {};
     data = await page.evaluate(() => {
