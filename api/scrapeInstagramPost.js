@@ -1,8 +1,10 @@
-const isVercel = process.env.VERCEL === '1';
 
-const puppeteer = isVercel ? require('puppeteer-core') : require('puppeteer');
+
+const puppeteer = require('puppeteer-core');
 const randomUseragent = require('random-useragent');
 const chromium = require("@sparticuz/chromium");
+
+const isVercel = process.env.VERCEL === '1';
 
 const browserOptions = async () => {
   return isVercel ? 
@@ -38,7 +40,14 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) =
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
 const scrapeInstagramPost = async (postLink) => {
-  const browser = await puppeteer.launch(await browserOptions);
+  const browser = await puppeteer.launch(
+    {
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
   const page = await browser.newPage();
 
   const userAgent = randomUseragent.getRandom();
