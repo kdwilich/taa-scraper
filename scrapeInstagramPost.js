@@ -1,10 +1,9 @@
 const puppeteer = require('puppeteer-core');
 const randomUseragent = require('random-useragent');
+const chrome = require('chrome-aws-lambda');
 
-const isVercel = process.env.VERCEL === '1'; // This checks if the app is running on Vercel
-const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'; // or another path to Chromium on Vercel
+const isVercel = process.env.VERCEL === '1';
 
-// Function to introduce random delays
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
 const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay = 3000) => {
@@ -22,7 +21,7 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay = 
 const scrapeInstagramPost = async (postLink) => {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: executablePath, // Specify the path to the Chromium binary
+    executablePath: chrome.executablePath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
