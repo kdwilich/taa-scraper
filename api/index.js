@@ -1,5 +1,4 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
 const app = express();
 const scrapeInstagramPost = require('./scrapeInstagramPost');
 
@@ -15,7 +14,7 @@ app.get('/api/getPostDetails', async (req, res) => {
   }
 
   try {
-    const data = await scrapeInstagramPost(puppeteer, postLink);
+    const data = await scrapeInstagramPost(postLink);
     res.status(200).json(data);
   } catch (error) {
     console.error('Error scraping Instagram post:', error.message);

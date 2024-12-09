@@ -1,26 +1,9 @@
-const randomUseragent = require('random-useragent');
+// local puppeteer:
+// const puppeteer = require('puppeteer-core');
+// vercal puppeteer:
+const puppeteer = require('puppeteer-core');
 const chromium = require("@sparticuz/chromium");
-
-const isVercel = process.env.VERCEL === '1';
-
-const browserOptions = async () => {
-  return isVercel ? 
-    {
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
-    }
-  :
-    {
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox'
-      ]
-    }
-}
+const randomUseragent = require('random-useragent');
 
 const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) => {
   for (let i = 0; i < maxRetries; i++) {
@@ -36,8 +19,21 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) =
 
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
-const scrapeInstagramPost = async (puppeteer, postLink) => {
-  const browser = await puppeteer.launch(await browserOptions);
+const scrapeInstagramPost = async (postLink) => {
+  const browser = await puppeteer.launch({
+    // local opts:
+    // headless: true,
+    // args: [
+    //   '--no-sandbox',
+    //   '--disable-setuid-sandbox'
+    // ]
+    //vercel opts:
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+    ignoreHTTPSErrors: true,
+  });
   const page = await browser.newPage();
 
   const userAgent = randomUseragent.getRandom();
@@ -48,7 +44,7 @@ const scrapeInstagramPost = async (puppeteer, postLink) => {
   try {
     console.log('Navigating to the post...');
     await page.goto(postLink, { waitUntil: 'domcontentloaded' });
-    // await page.waitForTimeout(3000);
+    await page.waitForTimeout(3000);
 
     await waitForSelectorWithRetry(page, 'main', 5, 3000);
     
@@ -58,7 +54,7 @@ const scrapeInstagramPost = async (puppeteer, postLink) => {
         await new Promise(r => setTimeout(r, 1000));
       }
     });
-    // await randomDelay(2000, 5000);
+    await randomDelay(2000, 5000);
     
     let data = {};
     data = await page.evaluate(() => {
