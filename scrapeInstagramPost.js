@@ -21,7 +21,7 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay = 
 const scrapeInstagramPost = async (postLink) => {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: chrome.executablePath,
+    executablePath: await chrome.executablePath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
