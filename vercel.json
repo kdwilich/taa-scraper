@@ -6,6 +6,6 @@
   }],
   "routes": [{
     "src": "/api/getPostDetails",
-    "dest": "/api/getPostDetails.js"
+    "dest": "/api.js"
   }]
 }
