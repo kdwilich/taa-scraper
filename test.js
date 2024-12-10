@@ -10,24 +10,24 @@ const sendEmail = require('./api/sendEmail');
 // })();
 
 
-(async () => {
-  const fields = {
-    link: 'https://www.instagram.com/p/DDXl43Rvt62/',
-    soldTo: 'angler',
-    address: '123 easy st',
-    soldPrice: 47
-  }
-  const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
-  Object.assign(fields, postDetails);
+// (async () => {
+//   const fields = {
+//     link: 'https://www.instagram.com/p/DDXl43Rvt62/',
+//     soldTo: 'angler',
+//     address: '123 easy st',
+//     soldPrice: 47
+//   }
+//   const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
+//   Object.assign(fields, postDetails);
 
-  const dateSold = new Date();
-  Object.assign(fields, { dateSold });
+//   const dateSold = new Date();
+//   Object.assign(fields, { dateSold });
 
-  const subject = `You sold an item on Instagram to ${fields.soldTo}`
-  const body = Object.entries(fields).map(([key, value]) => `<div style="color:black">${key}: ${value}</div>`).join('');
+//   const subject = `You sold an item on Instagram to ${fields.soldTo}`
+//   const body = Object.entries(fields).map(([key, value]) => `<div style="color:black">${key}: ${value}</div>`).join('');
   
-  await sendEmail(subject, body);
+//   await sendEmail(subject, body);
   
-  console.log(subject);
-  console.log(body);
-})();
+//   console.log(subject);
+//   console.log(body);
+// })();
