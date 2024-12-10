@@ -44,9 +44,9 @@ const scrapeInstagramPost = async (postLink) => {
   try {
     console.log('Navigating to the post...', postLink);
     await page.goto(postLink, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(3000);
 
-    await waitForSelectorWithRetry(page, 'main > div > div', 5, 3000);
+    await waitForSelectorWithRetry(page, 'main', 5, 3000);
     
     await page.evaluate(async () => {
       for (let i = 0; i < 5; i++) {
@@ -56,18 +56,22 @@ const scrapeInstagramPost = async (postLink) => {
     });
     await randomDelay(2000, 5000);
     
+    page.on('console', (msg) => {
+      for (let i = 0; i < msg.args().length; ++i)
+        console.log(`${i}: ${msg.args()[i]}`);
+    });
+
     console.log('Scraping data from post...');
     let data = {};
     data = await page.evaluate((maxRetries = 3) => {
       const idRegex = /#taa(\d+)/;
       let caption = null;
       let id = null;
-
       for (let i = 0; i < maxRetries; i++) {
         function traverseTextNodes(node) {
           if (node.nodeType === Node.TEXT_NODE) {
             const text = node.textContent.trim();
-            if (!caption && text.startsWith('Vintage')) {
+            if (!caption && text.includes('Vintage')) {
               caption = text;
               console.log('Found Caption: ', caption);
             }
@@ -83,7 +87,7 @@ const scrapeInstagramPost = async (postLink) => {
           }
         }
 
-        traverseTextNodes(document.querySelector('main > div > div'));
+        traverseTextNodes(document.body);
         
         if (caption && id) {
           return { caption, id };
