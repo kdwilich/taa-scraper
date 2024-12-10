@@ -43,6 +43,8 @@ app.post('/api/processSoldItem', async (req, res) => {
     const subject = `You sold an item on Instagram`
     const body = Object.entries(fields).map(([key, value]) => `<div style="color:black">${key}: ${value}</div>`).join('');
 
+    console.log('Data being sent: ', JSON.stringify(fields));
+
     console.log('Sending Email...');
     await sendEmail(subject, body);
     console.log('Email Sent...');
