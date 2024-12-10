@@ -33,7 +33,7 @@ app.post('/api/processSoldItem', async (req, res) => {
   }
 
   try {
-    console.log('Processing link... Using fake data?', process.env.FLAG_USEFAKEDATA);
+    console.log('Processing link...');
     const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(cleanInstagramURL(fields.link))}`)
     Object.assign(fields, postDetails);
 

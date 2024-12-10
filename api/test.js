@@ -17,9 +17,7 @@ const sendEmail = require('./sendEmail');
     address: '123 easy st',
     soldPrice: 47
   }
-  const { data: postDetails } = process.env.FLAG_USEFAKEDATA
-    ? { data: { caption: 'Vintage Eddie Bauer Denim Embroidered Dry Fly Shirt. Size XXL (26x32). $67 shipped.', id: 70 } }
-    : await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
+  const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
   Object.assign(fields, postDetails);
 
   const dateSold = new Date();
