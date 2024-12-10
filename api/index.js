@@ -10,14 +10,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/api/getPostDetails', async (req, res) => {
-  const postLink = req.query.link;
+  const link = req.query.link;
 
-  if (!postLink) {
+  if (!link) {
     return res.status(400).json({ error: 'Instagram post link is required' });
   }
 
   try {
-    const data = await scrapeInstagramPost(postLink);
+    const data = await scrapeInstagramPost(cleanInstagramURL(link));
     res.status(200).json(data);
   } catch (error) {
     console.error('Error scraping Instagram post:', error.message);
@@ -32,9 +32,9 @@ app.post('/api/processSoldItem', async (req, res) => {
     return res.status(400).json({ error: 'All fields are required.' });
   }
 
-  fields.link = cleanInstagramURL(fields.link);
 
   try {
+    fields.link = cleanInstagramURL(fields.link);
     console.log('Processing link...', fields.link);
     const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
     Object.assign(fields, postDetails);

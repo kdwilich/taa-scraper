@@ -4,7 +4,6 @@
 const puppeteer = require('puppeteer-core');
 const chromium = require("@sparticuz/chromium");
 const randomUseragent = require('random-useragent');
-const cleanInstagramURL = require('../tools');
 
 const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) => {
   for (let i = 0; i < maxRetries; i++) {
@@ -86,7 +85,7 @@ const scrapeInstagramPost = async (postLink) => {
 
   try {
     console.log('Navigating to the post...', postLink);
-    await page.goto(cleanInstagramURL(postLink), { waitUntil: 'domcontentloaded' });
+    await page.goto(postLink, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(3000);
 
     await waitForSelectorWithRetry(page, 'main', 5, 3000);
@@ -101,7 +100,30 @@ const scrapeInstagramPost = async (postLink) => {
     
     console.log('Scraping data from post...');
     let data = {};
-    data = await page.evaluate(getDataWithRetry);
+    data = await page.evaluate(() => {
+      const idRegex = /#taa(\d+)/;
+      let caption = null;
+      let id = null;
+      function traverseTextNodes(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent.trim();
+          if (!caption && text.startsWith('Vintage')) {
+            caption = text;
+          }
+          if (!id && idRegex.test(text)) {
+            id = parseInt(text.match(idRegex)[1], 10);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          for (const child of node.childNodes) {
+            traverseTextNodes(child);
+            if (caption && id) return; // Stop early if both are found
+          }
+        }
+      }
+      traverseTextNodes(document.body);
+      
+      return { caption, id };
+    });
 
     console.log('Scraping completed.', data);
     return data;
