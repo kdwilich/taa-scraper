@@ -32,9 +32,11 @@ app.post('/api/processSoldItem', async (req, res) => {
     return res.status(400).json({ error: 'All fields are required.' });
   }
 
+  fields.link = cleanInstagramURL(fields.link);
+
   try {
-    console.log('Processing link...');
-    const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(cleanInstagramURL(fields.link))}`)
+    console.log('Processing link...', fields.link);
+    const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
     Object.assign(fields, postDetails);
 
     const dateSold = new Date();

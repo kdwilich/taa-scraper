@@ -21,7 +21,6 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) =
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
 const getDataWithRetry = (maxRetries = 3) => {
-  console.log('Collecting data from post');
   const idRegex = /#taa(\d+)/;
   let caption = null;
   let id = null;
@@ -100,6 +99,7 @@ const scrapeInstagramPost = async (postLink) => {
     });
     await randomDelay(2000, 5000);
     
+    console.log('Scraping data from post...');
     let data = {};
     data = await page.evaluate(getDataWithRetry);
 
