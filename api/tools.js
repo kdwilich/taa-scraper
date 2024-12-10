@@ -12,6 +12,6 @@ module.exports = function cleanInstagramURL(url) {
     // Return the cleaned URL with the trailing slash
     return `${parsedUrl.origin}${match[0]}/`;
   } else {
-    throw new Error("Invalid Instagram URL format.");
+    throw new Error('Invalid Instagram URL format: ', url);
   }
 }
