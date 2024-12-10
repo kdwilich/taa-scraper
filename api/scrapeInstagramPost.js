@@ -46,7 +46,8 @@ const scrapeInstagramPost = async (postLink) => {
     await page.goto(postLink, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(3000);
 
-    await waitForSelectorWithRetry(page, 'main', 5, 3000);
+    const postSelector = 'main > div > div';
+    await waitForSelectorWithRetry(page, postSelector, 5, 3000);
     
     await page.evaluate(async () => {
       for (let i = 0; i < 5; i++) {
@@ -83,7 +84,7 @@ const scrapeInstagramPost = async (postLink) => {
           }
         }
 
-        traverseTextNodes(document.body);
+        traverseTextNodes(document.querySelector(postSelector));
         
         if (caption && id) {
           return { caption, id };
