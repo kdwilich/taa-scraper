@@ -4,7 +4,7 @@
 const puppeteer = require('puppeteer-core');
 const chromium = require("@sparticuz/chromium");
 const randomUseragent = require('random-useragent');
-const cleanInstagramURL = require('./tools');
+const cleanInstagramURL = require('../tools');
 
 const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) => {
   for (let i = 0; i < maxRetries; i++) {

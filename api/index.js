@@ -3,7 +3,7 @@ const axios = require('axios');
 const app = express();
 const scrapeInstagramPost = require('./scrapeInstagramPost');
 const sendEmail = require('./sendEmail');
-const cleanInstagramURL = require('./tools');
+const cleanInstagramURL = require('../tools');
 
 const PORT = process.env.PORT || 3000;
 

@@ -1,6 +1,6 @@
 const axios = require('axios');
-const scrapeInstagramPost = require('./scrapeInstagramPost');
-const sendEmail = require('./sendEmail');
+const scrapeInstagramPost = require('./api/scrapeInstagramPost');
+const sendEmail = require('./api/sendEmail');
 
 // (async () => {
 //   const postLink = 'https://www.instagram.com/p/DDVB-MNvd06/';
