@@ -85,7 +85,7 @@ const scrapeInstagramPost = async (postLink) => {
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
   try {
-    console.log('Navigating to the post...');
+    console.log('Navigating to the post...', postLink);
     await page.goto(cleanInstagramURL(postLink), { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(3000);
 
@@ -103,7 +103,7 @@ const scrapeInstagramPost = async (postLink) => {
     let data = {};
     data = await page.evaluate(getDataWithRetry);
 
-    console.log('Scraping completed.');
+    console.log('Scraping completed.', data);
     return data;
 
   } catch (error) {
