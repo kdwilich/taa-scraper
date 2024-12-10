@@ -19,48 +19,6 @@ const waitForSelectorWithRetry = async (page, selector, maxRetries = 3, delay) =
 
 const randomDelay = (min, max) => new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min));
 
-const getDataWithRetry = (maxRetries = 3) => {
-  const idRegex = /#taa(\d+)/;
-  let caption = null;
-  let id = null;
-
-  for (let i = 0; i < maxRetries; i++) {
-    function traverseTextNodes(node) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent.trim();
-        if (!caption && text.startsWith('Vintage')) {
-          caption = text;
-        }
-        if (!id && idRegex.test(text)) {
-          id = parseInt(text.match(idRegex)[1], 10);
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        for (const child of node.childNodes) {
-          traverseTextNodes(child);
-          if (caption && id) return; // Stop early if both are found
-        }
-      }
-    }
-
-    traverseTextNodes(document.body);
-    
-    if (caption && id) {
-      return { caption, id };
-    }
-    console.log(`Retrying to find data on page: (${i + 1}/${maxRetries})`);
-  }
-
-  if (caption) {
-    console.log('Caption found. No ID found.');
-    return { caption, id };
-  } else if (id) {
-    console.log('ID found. No Caption found.');
-    return { caption, id };
-  }
-
-  throw new Error(`Failed to find Caption or ID: ${selector} after ${maxRetries} retries`);
-}
-
 const scrapeInstagramPost = async (postLink) => {
   const browser = await puppeteer.launch({
     // local opts:
@@ -100,29 +58,48 @@ const scrapeInstagramPost = async (postLink) => {
     
     console.log('Scraping data from post...');
     let data = {};
-    data = await page.evaluate(() => {
+    data = await page.evaluate((maxRetries = 3) => {
       const idRegex = /#taa(\d+)/;
       let caption = null;
       let id = null;
-      function traverseTextNodes(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent.trim();
-          if (!caption && text.startsWith('Vintage')) {
-            caption = text;
-          }
-          if (!id && idRegex.test(text)) {
-            id = parseInt(text.match(idRegex)[1], 10);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          for (const child of node.childNodes) {
-            traverseTextNodes(child);
-            if (caption && id) return; // Stop early if both are found
+
+      for (let i = 0; i < maxRetries; i++) {
+        function traverseTextNodes(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (!caption && text.startsWith('Vintage')) {
+              caption = text;
+              console.log('Found Caption: ', caption);
+            }
+            if (!id && idRegex.test(text)) {
+              id = parseInt(text.match(idRegex)[1], 10);
+              console.log('Found ID: ', id);
+            }
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            for (const child of node.childNodes) {
+              traverseTextNodes(child);
+              if (caption && id) return; // Stop early if both are found
+            }
           }
         }
+
+        traverseTextNodes(document.body);
+        
+        if (caption && id) {
+          return { caption, id };
+        }
+        console.log(`Retrying to find data on page: (${i + 1}/${maxRetries})`);
       }
-      traverseTextNodes(document.body);
-      
-      return { caption, id };
+
+      if (caption) {
+        console.log('Caption found. No ID found.');
+        return { caption, id };
+      } else if (id) {
+        console.log('ID found. No Caption found.');
+        return { caption, id };
+      }
+
+      throw new Error(`Failed to find Caption or ID: ${selector} after ${maxRetries} retries`);
     });
 
     console.log('Scraping completed.', data);
