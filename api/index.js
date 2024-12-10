@@ -3,6 +3,7 @@ const axios = require('axios');
 const app = express();
 const scrapeInstagramPost = require('./scrapeInstagramPost');
 const sendEmail = require('./sendEmail');
+const cleanInstagramURL = require('./tools');
 
 const PORT = process.env.PORT || 3000;
 
@@ -35,7 +36,7 @@ app.post('/api/processSoldItem', async (req, res) => {
     console.log('Processing link... Using fake data?', process.env.FLAG_USEFAKEDATA);
     const { data: postDetails } = process.env.FLAG_USEFAKEDATA
       ? { data: { caption: 'Vintage Eddie Bauer Denim Embroidered Dry Fly Shirt. Size XXL (26x32). $67 shipped.', id: 77 } }
-      : await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
+      : await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(cleanInstagramURL(fields.link))}`)
     Object.assign(fields, postDetails);
 
     const dateSold = new Date();
