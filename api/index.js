@@ -28,15 +28,21 @@ app.get('/api/getPostDetails', async (req, res) => {
 app.post('/api/processSoldItem', async (req, res) => {
   const fields = req.body;
 
-  if (!fields.link || !fields.soldTo || !fields.address || !fields.soldPrice) {
+  if (!(fields.link || fields.id) || !fields.soldTo || !fields.address || !fields.soldPrice) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
 
 
   try {
-    fields.link = cleanInstagramURL(fields.link);
-    console.log('Processing link...', fields.link);
-    const { data: postDetails } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
+    let postDetails;
+    if (fields.id) {
+      postDetails = { id: fields.id };
+    } else {
+      fields.link = cleanInstagramURL(fields.link);
+      console.log('Processing link...', fields);
+      const { data } = await axios.get(`https://theanglersattic.vercel.app/api/getPostDetails?link=${encodeURIComponent(fields.link)}`)
+      postDetails = data;
+    }
     Object.assign(fields, postDetails);
 
     const dateSold = new Date();
